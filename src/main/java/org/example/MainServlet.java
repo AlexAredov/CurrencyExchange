@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 
 @WebServlet("/hello")
 public class MainServlet extends HttpServlet {
@@ -15,6 +16,12 @@ public class MainServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
+        Conn conn = new Conn();
+        try {
+            conn.conn();
+        } catch (ClassNotFoundException | SQLException e) {
+            throw new RuntimeException(e);
+        }
         Integer visitCounter = (Integer) session.getAttribute("visitCounter");
         if (visitCounter == null) {
             visitCounter = 1;
