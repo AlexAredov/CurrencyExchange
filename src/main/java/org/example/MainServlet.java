@@ -16,12 +16,6 @@ public class MainServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
-        Conn conn = new Conn();
-        try {
-            conn.conn();
-        } catch (ClassNotFoundException | SQLException e) {
-            throw new RuntimeException(e);
-        }
         Integer visitCounter = (Integer) session.getAttribute("visitCounter");
         if (visitCounter == null) {
             visitCounter = 1;
