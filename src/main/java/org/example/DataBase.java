@@ -1,4 +1,7 @@
 package org.example;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -36,16 +39,24 @@ public class DataBase {
         //}
     }
 
-    public static void ReadDB() {
-        //String sql = ";
+    public static JSONArray ReadDB() {
         try {
             statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM \"table\"");
+            resultSet = statement.executeQuery("SELECT * FROM \"currencies\"");
+            JSONArray jsonArray = new JSONArray();
             while(resultSet.next()) {
-                String  code = resultSet.getString("name");
-                System.out.println( "Code = " + code );
-                System.out.println();
+                JSONObject jsonObject = new JSONObject();
+                String  id = resultSet.getString("ID");
+                String  code = resultSet.getString("Code");
+                String  fullName = resultSet.getString("FullName");
+                String  sign = resultSet.getString("Sign");
+                jsonObject.put("ID", id);
+                jsonObject.put("Code", code);
+                jsonObject.put("FullName", fullName);
+                jsonObject.put("Sign", sign);
+                jsonArray.put(jsonObject);
             }
+            return jsonArray;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
