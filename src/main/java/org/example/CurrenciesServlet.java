@@ -19,4 +19,23 @@ public class CurrenciesServlet extends HttpServlet {
         PrintWriter printWriter = resp.getWriter();
         printWriter.write(jsonArray.toString());
     }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        DataBase.connect();
+        PrintWriter writer = response.getWriter();
+
+        String name = request.getParameter("name");
+        String code = request.getParameter("code");
+        String sign = request.getParameter("sign");
+
+        try {
+            DataBase.WriteDB(code, name, sign);
+            writer.println("success");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            writer.close();
+        }
+    }
 }

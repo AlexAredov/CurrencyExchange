@@ -22,7 +22,8 @@ public class DataBase {
         try {
             connection = null;
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
+            //connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
+            connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
             System.out.println();
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
@@ -30,13 +31,9 @@ public class DataBase {
     }
 
     public static void WriteDB(String code, String fullName, String sign) throws SQLException {
-        //try {
-            //String sql = "INSERT INTO 'table' ('Code', 'FullName', 'Sign') VALUES (" + code + "," + fullName + "," + sign + ");";
-            //statement.execute(sql);
-        //}
-        //catch (SQLException e) {
-        //    throw new RuntimeException(e);
-        //}
+        statement = connection.createStatement();
+        String sql = "INSERT INTO \"currencies\" ('Code', 'FullName', 'Sign') VALUES (\"" + code + "\",\"" + fullName + "\",\"" + sign + "\");";
+        statement.execute(sql);
     }
 
     public static JSONArray ReadDB() {
