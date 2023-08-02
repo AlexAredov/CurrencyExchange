@@ -1,5 +1,6 @@
 package org.example;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -28,14 +29,7 @@ public class CurrenciesServlet extends HttpServlet {
         String name = request.getParameter("name");
         String code = request.getParameter("code");
         String sign = request.getParameter("sign");
-
-        try {
-            DataBase.WriteDB(code, name, sign);
-            writer.println("success");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            writer.close();
-        }
+        JSONObject jsonObject = DataBase.WriteDB(code, name, sign);
+        writer.write(jsonObject.toString());
     }
 }

@@ -30,10 +30,23 @@ public class DataBase {
         }
     }
 
-    public static void WriteDB(String code, String fullName, String sign) throws SQLException {
-        statement = connection.createStatement();
-        String sql = "INSERT INTO \"currencies\" ('Code', 'FullName', 'Sign') VALUES (\"" + code + "\",\"" + fullName + "\",\"" + sign + "\");";
-        statement.execute(sql);
+    public static JSONObject WriteDB(String code, String fullName, String sign) {
+        try {
+            statement = connection.createStatement();
+            String sql = "INSERT INTO \"currencies\" ('Code', 'FullName', 'Sign') VALUES (\"" + code + "\",\"" + fullName + "\",\"" + sign + "\");";
+            statement.execute(sql);
+            statement = connection.createStatement();
+            String id = statement.executeQuery("SELECT \"ID\" FROM \"currencies\" WHERE \"Code\"=\"" + code + "\";").getString("ID");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("ID", id);
+            jsonObject.put("Code", code);
+            jsonObject.put("FullName", fullName);
+            jsonObject.put("Sign", sign);
+            return jsonObject;
+        } catch (SQLException e) {
+
+            throw new RuntimeException(e);
+        }
     }
 
     public static JSONArray ReadDB() {
