@@ -18,16 +18,12 @@ public class DataBase {
         connection = null;
     }
 
-    public static void connect() {
-        try {
-            connection = null;
-            Class.forName("org.sqlite.JDBC");
-            //connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
-            connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
-            System.out.println();
-        } catch (ClassNotFoundException | SQLException e) {
-            throw new RuntimeException(e);
-        }
+    public static void connect() throws ClassNotFoundException, SQLException {
+        connection = null;
+        Class.forName("org.sqlite.JDBC");
+        //connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
+        connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
+        System.out.println();
     }
 
     public static JSONObject WriteDB(String code, String fullName, String sign) {
@@ -49,27 +45,14 @@ public class DataBase {
         }
     }
 
-    public static JSONArray ReadDB() {
-        try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM \"currencies\"");
-            JSONArray jsonArray = new JSONArray();
-            while(resultSet.next()) {
-                JSONObject jsonObject = new JSONObject();
-                String  id = resultSet.getString("ID");
-                String  code = resultSet.getString("Code");
-                String  fullName = resultSet.getString("FullName");
-                String  sign = resultSet.getString("Sign");
-                jsonObject.put("ID", id);
-                jsonObject.put("Code", code);
-                jsonObject.put("FullName", fullName);
-                jsonObject.put("Sign", sign);
-                jsonArray.put(jsonObject);
-            }
-            return jsonArray;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    public static JSONArray ReadDB() throws SQLException {
+        statement = connection.createStatement();
+        resultSet = statement.executeQuery("SELECT * FROM \"currencies\"");
+        JSONArray jsonArray = new JSONArray();
+        while(resultSet.next()) {
+            jsonArray.put(formResultToJSON(resultSet));
         }
+        return jsonArray;
     }
 
     public static void CloseDB() {
@@ -80,5 +63,28 @@ public class DataBase {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static JSONObject GetByCode(String codeNew) throws SQLException {
+        statement = connection.createStatement();
+        resultSet = statement.executeQuery("SELECT * FROM \"currencies\" WHERE \"Code\"=\"" + codeNew + "\";");
+        if (!resultSet.isClosed()) {
+            return formResultToJSON(resultSet);
+        } else {
+            return null;
+        }
+    }
+
+    private static JSONObject formResultToJSON(ResultSet resultSet) throws SQLException {
+        JSONObject jsonObject = new JSONObject();
+        String  id = resultSet.getString("ID");
+        String  code = resultSet.getString("Code");
+        String  fullName = resultSet.getString("FullName");
+        String  sign = resultSet.getString("Sign");
+        jsonObject.put("ID", id);
+        jsonObject.put("Code", code);
+        jsonObject.put("FullName", fullName);
+        jsonObject.put("Sign", sign);
+        return jsonObject;
     }
 }

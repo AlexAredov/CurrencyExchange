@@ -14,22 +14,43 @@ import java.sql.SQLException;
 @WebServlet("/currencies")
 public class CurrenciesServlet extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        DataBase.connect();
-        JSONArray jsonArray = DataBase.ReadDB();
-        PrintWriter printWriter = resp.getWriter();
-        printWriter.write(jsonArray.toString());
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            DataBase.connect();
+            response.setStatus(HttpServletResponse.SC_OK);
+            JSONArray jsonArray = DataBase.ReadDB();
+            response.getWriter().print(jsonArray);
+        } catch (ClassNotFoundException | SQLException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        DataBase.connect();
-        PrintWriter writer = response.getWriter();
+        try {
+            DataBase.connect();
+            if (request.getParameter("name") != null) {
+                String name = request.getParameter("name");
+                String code = request.getParameter("code");
+                String sign = request.getParameter("sign");
+                if (DataBase.GetByCode(code) == null) {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    JSONObject jsonObject = DataBase.WriteDB(code, name, sign);
+                    response.getWriter().print(jsonObject);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_CONFLICT);
+                    response.getWriter().print("Currency with this code already exists");
+                }
 
-        String name = request.getParameter("name");
-        String code = request.getParameter("code");
-        String sign = request.getParameter("sign");
-        JSONObject jsonObject = DataBase.WriteDB(code, name, sign);
-        writer.write(jsonObject.toString());
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().print("Required form field is missing");
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
+        }
     }
 }
