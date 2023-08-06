@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 
 @WebServlet("/currencies")
@@ -18,13 +17,12 @@ public class CurrenciesServlet extends HttpServlet {
         try {
             DataBase.connect();
             response.setStatus(HttpServletResponse.SC_OK);
-            JSONArray jsonArray = DataBase.ReadDB();
+            JSONArray jsonArray = DataBase.ReadCurrencies();
             response.getWriter().print(jsonArray);
         } catch (ClassNotFoundException | SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);
         }
-
     }
 
     @Override
@@ -37,7 +35,8 @@ public class CurrenciesServlet extends HttpServlet {
                 String sign = request.getParameter("sign");
                 if (DataBase.GetByCode(code) == null) {
                     response.setStatus(HttpServletResponse.SC_OK);
-                    JSONObject jsonObject = DataBase.WriteDB(code, name, sign);
+                    Currency currency = new Currency(code, name, sign);
+                    JSONObject jsonObject = DataBase.WriteCurrencies(currency);
                     response.getWriter().print(jsonObject);
                 } else {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);

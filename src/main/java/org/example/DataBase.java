@@ -26,8 +26,11 @@ public class DataBase {
         System.out.println();
     }
 
-    public static JSONObject WriteDB(String code, String fullName, String sign) {
+    public static JSONObject WriteCurrencies(Currency currency) {
         try {
+            String code = currency.getCode();
+            String fullName = currency.getName();
+            String sign = currency.getSign();
             statement = connection.createStatement();
             String sql = "INSERT INTO \"currencies\" ('Code', 'FullName', 'Sign') VALUES (\"" + code + "\",\"" + fullName + "\",\"" + sign + "\");";
             statement.execute(sql);
@@ -45,12 +48,22 @@ public class DataBase {
         }
     }
 
-    public static JSONArray ReadDB() throws SQLException {
+    public static JSONArray ReadCurrencies() throws SQLException {
         statement = connection.createStatement();
         resultSet = statement.executeQuery("SELECT * FROM \"currencies\"");
         JSONArray jsonArray = new JSONArray();
         while(resultSet.next()) {
-            jsonArray.put(formResultToJSON(resultSet));
+            jsonArray.put(formResultToJSONcurrencies(resultSet));
+        }
+        return jsonArray;
+    }
+
+    public static JSONArray ReadExchangeRates() throws SQLException {
+        statement = connection.createStatement();
+        resultSet = statement.executeQuery("SELECT * FROM \"exchange_rates\"");
+        JSONArray jsonArray = new JSONArray();
+        while(resultSet.next()) {
+            jsonArray.put(formResultToJSONcurrencies(resultSet));
         }
         return jsonArray;
     }
@@ -69,13 +82,13 @@ public class DataBase {
         statement = connection.createStatement();
         resultSet = statement.executeQuery("SELECT * FROM \"currencies\" WHERE \"Code\"=\"" + codeNew + "\";");
         if (!resultSet.isClosed()) {
-            return formResultToJSON(resultSet);
+            return formResultToJSONcurrencies(resultSet);
         } else {
             return null;
         }
     }
 
-    private static JSONObject formResultToJSON(ResultSet resultSet) throws SQLException {
+    private static JSONObject formResultToJSONcurrencies(ResultSet resultSet) throws SQLException {
         JSONObject jsonObject = new JSONObject();
         String  id = resultSet.getString("ID");
         String  code = resultSet.getString("Code");
@@ -85,6 +98,11 @@ public class DataBase {
         jsonObject.put("Code", code);
         jsonObject.put("FullName", fullName);
         jsonObject.put("Sign", sign);
+        return jsonObject;
+    }
+
+    private static JSONObject fromResultToJSONexchange(ResultSet resultSet) {
+        JSONObject jsonObject = new JSONObject();
         return jsonObject;
     }
 }

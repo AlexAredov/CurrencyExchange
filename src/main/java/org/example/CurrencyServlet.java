@@ -16,10 +16,21 @@ public class CurrencyServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             DataBase.connect();
-            String name = request.getPathInfo().substring(1);
-            JSONObject jsonObject = DataBase.GetByCode(name);
-            response.getWriter().print(jsonObject);
+            String code = request.getPathInfo().substring(1);
+            if (!code.isEmpty()) {
+                if (DataBase.GetByCode(code) != null) {
+                    JSONObject jsonObject = DataBase.GetByCode(code);
+                    response.getWriter().print(jsonObject);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().print("Currency not found");
+                }
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().print("The currency code is not in the address");
+            }
         } catch (SQLException | ClassNotFoundException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);
         }
     }
