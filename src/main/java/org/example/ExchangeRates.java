@@ -19,6 +19,7 @@ public class ExchangeRates extends HttpServlet {
             JSONArray jsonArray = DataBase.ReadExchangeRates();
             response.getWriter().print(jsonArray);
         } catch (ClassNotFoundException | SQLException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);
         }
 

@@ -21,8 +21,8 @@ public class DataBase {
     public static void connect() throws ClassNotFoundException, SQLException {
         connection = null;
         Class.forName("org.sqlite.JDBC");
-        connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
-        //connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
+        //connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
+        connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
         System.out.println();
     }
 
@@ -63,7 +63,7 @@ public class DataBase {
         resultSet = statement.executeQuery("SELECT * FROM \"exchange_rates\"");
         JSONArray jsonArray = new JSONArray();
         while(resultSet.next()) {
-            jsonArray.put(formResultToJSONcurrencies(resultSet));
+            jsonArray.put(fromResultToJSONexchange(resultSet));
         }
         return jsonArray;
     }
@@ -80,9 +80,19 @@ public class DataBase {
 
     public static JSONObject GetByCode(String codeNew) throws SQLException {
         statement = connection.createStatement();
-        resultSet = statement.executeQuery("SELECT * FROM \"currencies\" WHERE \"Code\"=\"" + codeNew + "\";");
-        if (!resultSet.isClosed()) {
-            return formResultToJSONcurrencies(resultSet);
+        ResultSet resultSetCode = statement.executeQuery("SELECT * FROM \"currencies\" WHERE \"Code\"=\"" + codeNew + "\";");
+        if (!resultSetCode.isClosed()) {
+            return formResultToJSONcurrencies(resultSetCode);
+        } else {
+            return null;
+        }
+    }
+
+    public static JSONObject GetById(String id) throws SQLException {
+        statement = connection.createStatement();
+         ResultSet resultSetId = statement.executeQuery("SELECT * FROM \"currencies\" WHERE \"ID\"=" + Integer.parseInt(id) + ";");
+        if (!resultSetId.isClosed()) {
+            return formResultToJSONcurrencies(resultSetId);
         } else {
             return null;
         }
@@ -106,9 +116,21 @@ public class DataBase {
         String id = resultSet.getString("ID");
         String baseCurrencyId = resultSet.getString("BaseCurrencyId");
         String targetCurrencyId = resultSet.getString("TargetCurrencyId");
-        String rate = resultSet.getString("Rate");
+        Double rate = Double.valueOf(resultSet.getString("Rate"));
         jsonObject.put("id", id);
-        jsonObject.put("baseCurrency", baseCurrencyId);
+        jsonObject.put("baseCurrency", GetById(baseCurrencyId));
+        jsonObject.put("targetCurrency", GetById(targetCurrencyId));
+        jsonObject.put("rate", rate);
+        return jsonObject;
+    }
+
+    public static JSONObject GetRateByCodes(String codeBaseCurrency, String codeTargetCurrency) throws SQLException {
+        Integer idBaseCurrency = Integer.parseInt(GetByCode(codeBaseCurrency).getString("ID"));
+        Integer idTargetCurrency = Integer.parseInt(GetByCode(codeTargetCurrency).getString("ID"));
+        System.out.println(idBaseCurrency);
+        System.out.println(idTargetCurrency);
+        JSONObject jsonObject = new JSONObject();
+        //TODO
         return jsonObject;
     }
 }
