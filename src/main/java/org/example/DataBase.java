@@ -21,8 +21,8 @@ public class DataBase {
     public static void connect() throws ClassNotFoundException, SQLException {
         connection = null;
         Class.forName("org.sqlite.JDBC");
-        //connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
-        connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
+        connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
+        //connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
         System.out.println();
     }
 
@@ -101,8 +101,14 @@ public class DataBase {
         return jsonObject;
     }
 
-    private static JSONObject fromResultToJSONexchange(ResultSet resultSet) {
+    private static JSONObject fromResultToJSONexchange(ResultSet resultSet) throws SQLException {
         JSONObject jsonObject = new JSONObject();
+        String id = resultSet.getString("ID");
+        String baseCurrencyId = resultSet.getString("BaseCurrencyId");
+        String targetCurrencyId = resultSet.getString("TargetCurrencyId");
+        String rate = resultSet.getString("Rate");
+        jsonObject.put("id", id);
+        jsonObject.put("baseCurrency", baseCurrencyId);
         return jsonObject;
     }
 }
