@@ -43,7 +43,6 @@ public class DataBase {
             jsonObject.put("Sign", sign);
             return jsonObject;
         } catch (SQLException e) {
-
             throw new RuntimeException(e);
         }
     }
@@ -81,7 +80,7 @@ public class DataBase {
     public static JSONObject GetByCode(String codeNew) throws SQLException {
         statement = connection.createStatement();
         ResultSet resultSetCode = statement.executeQuery("SELECT * FROM \"currencies\" WHERE \"Code\"=\"" + codeNew + "\";");
-        if (!resultSetCode.isClosed()) {
+        if (resultSetCode.next()) {
             return formResultToJSONcurrencies(resultSetCode);
         } else {
             return null;
@@ -91,7 +90,7 @@ public class DataBase {
     public static JSONObject GetById(String id) throws SQLException {
         statement = connection.createStatement();
          ResultSet resultSetId = statement.executeQuery("SELECT * FROM \"currencies\" WHERE \"ID\"=" + Integer.parseInt(id) + ";");
-        if (!resultSetId.isClosed()) {
+        if (resultSetId.next()) {
             return formResultToJSONcurrencies(resultSetId);
         } else {
             return null;
@@ -129,8 +128,22 @@ public class DataBase {
         Integer idTargetCurrency = Integer.parseInt(GetByCode(codeTargetCurrency).getString("ID"));
         System.out.println(idBaseCurrency);
         System.out.println(idTargetCurrency);
-        JSONObject jsonObject = new JSONObject();
-        //TODO
-        return jsonObject;
+        Statement statement1 = connection.createStatement();
+        ResultSet resultSetCode = statement1.executeQuery("SELECT * FROM \"exchange_rates\" WHERE \"BaseCurrencyId\"=\"" + idBaseCurrency + "\" AND \"TargetCurrencyId\"=\"" + idTargetCurrency + "\";");
+        if (resultSetCode.next()) {
+            return fromResultToJSONexchange(resultSetCode);
+        } else {
+            return null;
+        }
     }
+
+    public static JSONObject WriteExchangeRate(String baseCurrencyCode, String targetCurrencyCode, float rate) throws SQLException {
+        statement = connection.createStatement();
+        Integer idBaseCurrency = Integer.parseInt(GetByCode(baseCurrencyCode).getString("ID"));
+        Integer idTargetCurrency = Integer.parseInt(GetByCode(targetCurrencyCode).getString("ID"));
+        String sql = "INSERT INTO \"exchange_rates\" ('BaseCurrencyId', 'TargetCurrencyId', 'Rate') VALUES (\"" + idBaseCurrency + "\",\"" + idTargetCurrency + "\",\"" + rate + "\");";
+        statement.execute(sql);
+        return GetRateByCodes(baseCurrencyCode, targetCurrencyCode);
+    }
+
 }

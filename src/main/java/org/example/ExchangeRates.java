@@ -1,6 +1,7 @@
 package org.example;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -22,6 +23,32 @@ public class ExchangeRates extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);
         }
+    }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            DataBase.connect();
+            if (request.getParameter("baseCurrencyCode") != null) {
+                String baseCurrencyCode = request.getParameter("baseCurrencyCode");
+                String targetCurrencyCode = request.getParameter("targetCurrencyCode");
+                float rate = Float.parseFloat(request.getParameter("rate"));
+                if (DataBase.GetRateByCodes(baseCurrencyCode, targetCurrencyCode) == null) {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    JSONObject jsonObject = DataBase.WriteExchangeRate(baseCurrencyCode, targetCurrencyCode, rate);
+                    response.getWriter().print(jsonObject);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_CONFLICT);
+                    response.getWriter().print("Currency pair with this code already exists");
+                }
+
+            } else {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().print("Required form field is missing");
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
+        }
     }
 }
