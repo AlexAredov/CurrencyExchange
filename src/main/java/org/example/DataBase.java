@@ -23,7 +23,7 @@ public class DataBase {
         Class.forName("org.sqlite.JDBC");
         //connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
         connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
-        System.out.println();
+        statement = connection.createStatement();
     }
 
     public static JSONObject WriteCurrencies(Currency currency) {
@@ -88,7 +88,7 @@ public class DataBase {
     }
 
     public static JSONObject GetById(String id) throws SQLException {
-        statement = connection.createStatement();
+        //statement = connection.createStatement();
          ResultSet resultSetId = statement.executeQuery("SELECT * FROM \"currencies\" WHERE \"ID\"=" + Integer.parseInt(id) + ";");
         if (resultSetId.next()) {
             return formResultToJSONcurrencies(resultSetId);
@@ -144,6 +144,14 @@ public class DataBase {
         String sql = "INSERT INTO \"exchange_rates\" ('BaseCurrencyId', 'TargetCurrencyId', 'Rate') VALUES (\"" + idBaseCurrency + "\",\"" + idTargetCurrency + "\",\"" + rate + "\");";
         statement.execute(sql);
         return GetRateByCodes(baseCurrencyCode, targetCurrencyCode);
+    }
+
+    public static void PatchRateByCodes(String codeBaseCurrency, String codeTargetCurrency, float rate) throws SQLException {
+        //statement1 = connection.createStatement();
+        Integer idBaseCurrency = Integer.parseInt(GetByCode(codeBaseCurrency).getString("ID"));
+        Integer idTargetCurrency = Integer.parseInt(GetByCode(codeTargetCurrency).getString("ID"));
+        String sql = "UPDATE \"exchange_rates\" SET \"Rate\" = \"" + rate + "\" WHERE \"BaseCurrencyId\"=\"" + idBaseCurrency + "\" AND \"TargetCurrencyId\"=\"" + idTargetCurrency + "\";";
+        statement.execute(sql);
     }
 
 }

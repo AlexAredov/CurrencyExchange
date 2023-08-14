@@ -29,6 +29,7 @@ public class CurrencyServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().print("The currency code is not in the address");
             }
+            DataBase.CloseDB();
         } catch (SQLException | ClassNotFoundException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);

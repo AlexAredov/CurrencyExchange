@@ -19,6 +19,7 @@ public class CurrenciesServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_OK);
             JSONArray jsonArray = DataBase.ReadCurrencies();
             response.getWriter().print(jsonArray);
+            DataBase.CloseDB();
         } catch (ClassNotFoundException | SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);
@@ -42,11 +43,11 @@ public class CurrenciesServlet extends HttpServlet {
                     response.setStatus(HttpServletResponse.SC_CONFLICT);
                     response.getWriter().print("Currency with this code already exists");
                 }
-
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().print("Required form field is missing");
             }
+            DataBase.CloseDB();
         } catch (ClassNotFoundException | SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);

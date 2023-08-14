@@ -19,6 +19,7 @@ public class ExchangeRates extends HttpServlet {
             DataBase.connect();
             JSONArray jsonArray = DataBase.ReadExchangeRates();
             response.getWriter().print(jsonArray);
+            DataBase.CloseDB();
         } catch (ClassNotFoundException | SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);
@@ -46,6 +47,7 @@ public class ExchangeRates extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.getWriter().print("Required form field is missing");
             }
+            DataBase.CloseDB();
         } catch (ClassNotFoundException | SQLException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             throw new RuntimeException(e);
