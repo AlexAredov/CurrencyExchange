@@ -88,7 +88,7 @@ public class DataBase {
     }
 
     public static JSONObject GetById(String id) throws SQLException {
-        //statement = connection.createStatement();
+        statement = connection.createStatement();
          ResultSet resultSetId = statement.executeQuery("SELECT * FROM \"currencies\" WHERE \"ID\"=" + Integer.parseInt(id) + ";");
         if (resultSetId.next()) {
             return formResultToJSONcurrencies(resultSetId);
@@ -112,14 +112,21 @@ public class DataBase {
 
     private static JSONObject fromResultToJSONexchange(ResultSet resultSet) throws SQLException {
         JSONObject jsonObject = new JSONObject();
-        String id = resultSet.getString("ID");
         String baseCurrencyId = resultSet.getString("BaseCurrencyId");
         String targetCurrencyId = resultSet.getString("TargetCurrencyId");
         Double rate = Double.valueOf(resultSet.getString("Rate"));
-        jsonObject.put("id", id);
         jsonObject.put("baseCurrency", GetById(baseCurrencyId));
         jsonObject.put("targetCurrency", GetById(targetCurrencyId));
         jsonObject.put("rate", rate);
+        return jsonObject;
+    }
+
+    private static JSONObject fromResultToJSONexchangeWithoutRate(ResultSet resultSet) throws SQLException {
+        JSONObject jsonObject = new JSONObject();
+        String baseCurrencyId = resultSet.getString("BaseCurrencyId");
+        String targetCurrencyId = resultSet.getString("TargetCurrencyId");
+        jsonObject.put("baseCurrency", GetById(baseCurrencyId));
+        jsonObject.put("targetCurrency", GetById(targetCurrencyId));
         return jsonObject;
     }
 
@@ -152,6 +159,58 @@ public class DataBase {
         Integer idTargetCurrency = Integer.parseInt(GetByCode(codeTargetCurrency).getString("ID"));
         String sql = "UPDATE \"exchange_rates\" SET \"Rate\" = \"" + rate + "\" WHERE \"BaseCurrencyId\"=\"" + idBaseCurrency + "\" AND \"TargetCurrencyId\"=\"" + idTargetCurrency + "\";";
         statement.execute(sql);
+    }
+
+    public static JSONObject ExchangeByCodes(String fromCurrencyCode, String toCurrencyCode, float amount) throws SQLException {
+        Integer idBaseCurrency = Integer.parseInt(GetByCode(fromCurrencyCode).getString("ID"));
+        Integer idTargetCurrency = Integer.parseInt(GetByCode(toCurrencyCode).getString("ID"));
+        System.out.println(idBaseCurrency);
+        System.out.println(idTargetCurrency);
+        Statement statement = connection.createStatement();
+        JSONObject jsonObject = new JSONObject();
+        ResultSet resultSetCode = statement.executeQuery("SELECT * FROM \"exchange_rates\" WHERE \"BaseCurrencyId\"=\"" + idBaseCurrency + "\" AND \"TargetCurrencyId\"=\"" + idTargetCurrency + "\";");
+        if (resultSetCode.next()) {
+            Double rate = Double.valueOf(resultSetCode.getString("Rate"));
+            jsonObject = fromResultToJSONexchange(resultSetCode);
+            jsonObject.put("amount", amount);
+            jsonObject.put("convertedAmount", amount*rate);
+            return jsonObject;
+        } else {
+            statement = connection.createStatement();
+            ResultSet resultSetCode3 = statement.executeQuery("SELECT * FROM \"exchange_rates\" WHERE \"BaseCurrencyId\"=\"" + idTargetCurrency + "\" AND \"TargetCurrencyId\"=\"" + idBaseCurrency + "\";");
+            if (resultSetCode3.next()) {
+                jsonObject = fromResultToJSONexchangeWithoutRate(resultSetCode3);
+                Double rate = 1/Double.parseDouble(resultSetCode3.getString("Rate"));
+                jsonObject.put("rate", rate);
+                jsonObject.put("amount", amount);
+                jsonObject.put("convertedAmount", amount*rate);
+                return jsonObject;
+            }
+            else {
+                statement = connection.createStatement();
+                ResultSet resultSetCode1 = statement.executeQuery("SELECT * FROM \"exchange_rates\" WHERE \"BaseCurrencyId\"=\"" + idBaseCurrency + "\" AND \"TargetCurrencyId\"=\"" + 4 + "\";");
+                statement = connection.createStatement();
+                ResultSet resultSetCode2 = statement.executeQuery("SELECT * FROM \"exchange_rates\" WHERE \"BaseCurrencyId\"=\"" + 4 + "\" AND \"TargetCurrencyId\"=\"" + idTargetCurrency + "\";");
+                System.out.println(resultSetCode1.getString("Rate"));
+                System.out.println(resultSetCode2.getString("Rate"));
+                if (resultSetCode1.next() && resultSetCode2.next()) {
+                    Double rate = Double.valueOf(resultSetCode1.getString("Rate"));
+                    Double rate1 = Double.valueOf(resultSetCode2.getString("Rate"));
+                    rate = rate * rate1;
+                    String baseCurrencyId = resultSetCode1.getString("BaseCurrencyId");
+                    String targetCurrencyId = resultSetCode2.getString("TargetCurrencyId");
+                    jsonObject.put("baseCurrency", GetById(baseCurrencyId));
+                    jsonObject.put("targetCurrency", GetById(targetCurrencyId));
+                    jsonObject.put("rate", rate);
+                    jsonObject.put("amount", amount);
+                    jsonObject.put("convertedAmount", amount*rate);
+                    return jsonObject;
+                }
+                else {
+                    return null;
+                }
+            }
+        }
     }
 
 }
