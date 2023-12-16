@@ -22,7 +22,8 @@ public class DataBase {
         connection = null;
         Class.forName("org.sqlite.JDBC");
         //connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/IdeaProjects/CurrencyExchange/identifier.sqlite");
-        connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
+        //connection = DriverManager.getConnection("jdbc:sqlite:C:/Users/aared/OneDrive/Документы/GitHub/CurrencyExchange/identifier.sqlite");
+        connection = DriverManager.getConnection("jdbc:sqlite:/Users/aleksejaredov/Documents/GitHub/CurrencyExchange/identifier.sqlite");
         statement = connection.createStatement();
     }
 
